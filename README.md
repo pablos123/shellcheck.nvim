@@ -49,3 +49,10 @@ Run `shellcheck` in command mode.
 ```c
 :lua ShellCheck.run()
 ```
+
+Force diagnostics for some shell.
+```bash
+#!/bin/mywrapper
+# shellcheck shell=bash
+```
+https://www.shellcheck.net/wiki/SC1008
