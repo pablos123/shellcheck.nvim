@@ -8,7 +8,7 @@ ShellCheck diagnostics inside Neovim.
 - Supports sh/bash/dash/ksh.
 - Runs only on `BufEnter` and `BufWritePost` events.
 
-## Dependencias
+## Dependencies
 - `shellcheck` available in `$PATH`.
 - `nvim 0.7` or greater.
 
