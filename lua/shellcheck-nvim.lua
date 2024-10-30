@@ -20,7 +20,6 @@ ShellCheck.clean = function()
 end
 
 -- Helper
-
 function H.has_shellcheck()
     return vim.fn.executable('shellcheck') == 1
 end

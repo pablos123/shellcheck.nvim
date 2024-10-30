@@ -24,18 +24,20 @@ Use your favorite plugin manager!
 ```
 
 <details>
-  <summary>Configure</summary>
-    ```lua
-    {
-        'pablos123/shellcheck.nvim',
-        config = function ()
-            -- Pass extra arguments to the shellcheck command.
-            require 'shellcheck-nvim'.setup {
-                extras = { '-x', '--enable=all', },
-            }
-        end
-    }
-    ```
+<summary>Configure</summary>
+
+```lua
+{
+    'pablos123/shellcheck.nvim',
+    config = function ()
+        -- Pass extra arguments to the shellcheck command.
+        require 'shellcheck-nvim'.setup {
+            extras = { '-x', '--enable=all', },
+        }
+    end
+}
+```
+
 </details>
 
 ## Others
