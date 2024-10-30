@@ -5,35 +5,39 @@ local ShellCheck = {}
 -- ShellCheck
 ShellCheck.setup = function(config)
     _G.ShellCheck = ShellCheck
-    H.set_config(config)
-    H.set_behaviour()
+    H:set_config(config)
+    H:set_behaviour()
 end
 
 ShellCheck.run = function()
     local file_path = vim.api.nvim_buf_get_name(0)
     if file_path == '' then return end
-    H.get_shellcheck_output(file_path, vim.api.nvim_get_current_buf())
+    H:get_shellcheck_output(file_path, vim.api.nvim_get_current_buf())
 end
 
--- Helpers
-H.set_config = function(config)
-    local default_configs = { extras = {} }
-    H.config = vim.tbl_extend('force', default_configs, config or {})
+ShellCheck.clean = function()
+    H:set_shellcheck_diagnostics('[]', vim.api.nvim_get_current_buf())
 end
 
-H.has_shellcheck = function()
+-- Helper
+
+function H.has_shellcheck()
     return vim.fn.executable('shellcheck') == 1
 end
 
-H.shell_supported = function(output)
+function H.file_exists(file_path)
+    return vim.fn.filereadable(file_path) == 1
+end
+
+function H.shell_supported(output)
     return not string.find(output, 'ShellCheck only supports sh/bash/dash/ksh')
 end
 
-H.print_error = function(error)
+function H.print_error(error)
     vim.api.nvim_err_writeln('ShellCheck: ' .. error)
 end
 
-H.get_nvim_severity = function(shellcheck_severity)
+function H.get_nvim_severity(shellcheck_severity)
     local severity_table = {
         ['style'] = vim.diagnostic.severity.HINT,
         ['info'] = vim.diagnostic.severity.INFO,
@@ -43,38 +47,46 @@ H.get_nvim_severity = function(shellcheck_severity)
     return severity_table[shellcheck_severity]
 end
 
-H.set_behaviour = function()
+function H:set_config(config)
+    local default_configs = { extras = {} }
+    self.config = vim.tbl_extend('force', default_configs, config or {})
+end
+
+function H:set_behaviour()
     local shellcheck_autogroup = vim.api.nvim_create_augroup(
         'shellcheck-nvim',
         {}
     )
-    vim.api.nvim_create_autocmd({ 'BufEnter', 'BufWritePost' }, {
+
+    local events = { 'BufEnter', 'BufWritePost' }
+
+    local run_shellcheck = function()
+        if vim.bo.filetype == 'sh' then ShellCheck.run() end
+    end
+
+    vim.api.nvim_create_autocmd(events, {
         pattern = '*',
-        callback = function()
-            if vim.bo.filetype == 'sh' then
-                ShellCheck.run()
-            end
-        end,
+        callback = run_shellcheck,
         group = shellcheck_autogroup
     })
 end
 
-H.handle_shellcheck_exit_code = function(code)
+function H:handle_shellcheck_exit_code(code)
     if code == 2 then
-        H.print_error('Some files could not be processed.')
+        self.print_error('Some files could not be processed.')
     elseif code == 3 then
-        H.print_error('Invoked with bad syntax.')
+        self.print_error('Invoked with bad syntax.')
     elseif code == 4 then
-        H.print_error('Invoked with bad options.')
+        self.print_error('Invoked with bad options.')
     end
 end
 
-H.prepare_args = function(file_path)
+function H:prepare_args(file_path)
     local shellcheck_args = {
         '--color=never',
         '--format=json',
     }
-    for _, extra_arg in ipairs(H.config.extras) do
+    for _, extra_arg in ipairs(self.config.extras) do
         table.insert(shellcheck_args, extra_arg)
     end
     table.insert(shellcheck_args, '--')
@@ -82,32 +94,36 @@ H.prepare_args = function(file_path)
     return shellcheck_args
 end
 
-H.get_shellcheck_output = function(file_path, buffern)
-    if not H.has_shellcheck() then
-        H.print_error('shellcheck not found in PATH.')
+function H:get_shellcheck_output(file_path, buffern)
+    if not self.file_exists(file_path) then return end
+
+    if not self.has_shellcheck() then
+        self.print_error('shellcheck not found in PATH.')
         return
     end
 
-    -- Async thread
-    -- If shell is not supported clean diagnostics on buffer.
-    -- This handles the case of changing the shell on the go.
-    local shellcheck_output = '[]'
-
+    -- Async thread, main logic is here
+    local shellcheck_output = ''
     local handler
     local stdout_pipe = vim.uv.new_pipe(false)
 
     -- Execute on shellcheck exit. Append the call to nvim's main loop.
     local on_exit = vim.schedule_wrap(function(code)
-        H.handle_shellcheck_exit_code(code)
+        self:handle_shellcheck_exit_code(code)
         stdout_pipe:read_stop()
         stdout_pipe:close()
         handler:close()
-        H.set_shellcheck_diagnostics(shellcheck_output, buffern)
+
+        -- If shell is not supported clean diagnostics on buffer.
+        -- This handles the case of changing the shell on the go.
+        if shellcheck_output == '' then shellcheck_output = '[]' end
+
+        self:set_shellcheck_diagnostics(shellcheck_output, buffern)
     end
     )
 
     local options = {
-        args = H.prepare_args(file_path),
+        args = self:prepare_args(file_path),
         stdio = { nil, stdout_pipe, nil }
     }
 
@@ -118,17 +134,18 @@ H.get_shellcheck_output = function(file_path, buffern)
     stdout_pipe:read_start(function(err, data)
         assert(not err, err)
 
-        if data and H.shell_supported(data) then
-            shellcheck_output = string.gsub(data, '\n', '')
+        if data and self.shell_supported(data) then
+            -- If json is too large I want to append the output
+            shellcheck_output = shellcheck_output .. string.gsub(data, '\n', '')
         end
     end)
 end
 
-H.set_shellcheck_diagnostics = function(shellcheck_output, buffern)
+function H:set_shellcheck_diagnostics(shellcheck_output, buffern)
     assert(shellcheck_output)
     assert(shellcheck_output ~= '')
 
-    local diagnosticss = H.create_nvim_diagnostics(
+    local diagnosticss = self:create_nvim_diagnostics(
         vim.fn.json_decode(shellcheck_output),
         buffern
     )
@@ -140,7 +157,7 @@ H.set_shellcheck_diagnostics = function(shellcheck_output, buffern)
     )
 end
 
-H.create_nvim_diagnostics = function(shellcheck_diagnostics, buffern)
+function H:create_nvim_diagnostics(shellcheck_diagnostics, buffern)
     assert(shellcheck_diagnostics)
 
     local nvim_diagnostics = {}
@@ -153,7 +170,7 @@ H.create_nvim_diagnostics = function(shellcheck_diagnostics, buffern)
             end_col = sc_diag.endColumn - 1,
             message = sc_diag.message,
             code = 'https://www.shellcheck.net/wiki/SC' .. sc_diag.code,
-            severity = H.get_nvim_severity(sc_diag.level),
+            severity = self.get_nvim_severity(sc_diag.level),
             source = 'shellcheck-nvim',
         }
         table.insert(nvim_diagnostics, nvim_diagnostic)
