@@ -3,19 +3,19 @@ local H = {}
 local ShellCheck = {}
 
 -- ShellCheck
-ShellCheck.setup = function(config)
+function ShellCheck.setup(config)
     _G.ShellCheck = ShellCheck
     H:set_config(config)
     H:set_behaviour()
 end
 
-ShellCheck.run = function()
+function ShellCheck.run()
     local file_path = vim.api.nvim_buf_get_name(0)
     if file_path == '' then return end
     H:get_shellcheck_output(file_path, vim.api.nvim_get_current_buf())
 end
 
-ShellCheck.clean = function()
+function ShellCheck.clean()
     H:set_shellcheck_diagnostics('[]', vim.api.nvim_get_current_buf())
 end
 

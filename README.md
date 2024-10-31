@@ -5,8 +5,9 @@ ShellCheck diagnostics inside Neovim.
 - Asynchronous.
 - No LSP involved.
 - No ALE, Neomake or Syntastic needed.
-- Runs only on `BufEnter` and `BufWritePost` events.
 - Supports sh/bash/dash/ksh.
+- Runs only on `BufEnter` and `BufWritePost` events.
+- Runs only when filetype is _sh_.
 
 ## Dependencies
 - `shellcheck` available in `$PATH`.
@@ -53,8 +54,8 @@ Clean `shellcheck` diagnostics for current buffer.
 :lua ShellCheck.clean()
 ```
 
-Force diagnostics for some shell or wrapper. (https://www.shellcheck.net/wiki/SC1008)
+Force diagnostics for some wrapper. (Remeber to set the filetype to _sh_ too)
 ```bash
-#!/bin/zsh
+#!/bin/false
 # shellcheck shell=bash
 ```
