@@ -54,7 +54,7 @@ Clean `shellcheck` diagnostics for current buffer.
 :lua ShellCheck.clean()
 ```
 
-Force diagnostics for some wrapper. Remeber to `set ft=sh_` too.
+Force diagnostics for some wrapper. Remeber to `set ft=sh` too.
 ```bash
 #!/bin/false
 # shellcheck shell=bash
