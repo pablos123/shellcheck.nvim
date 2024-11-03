@@ -11,7 +11,7 @@ ShellCheck diagnostics inside Neovim.
 
 ## Dependencies
 - `shellcheck` available in `$PATH`.
-- `nvim 0.7` or greater.
+- `nvim >= 0.7`.
 
 ## Install
 Use your favorite plugin manager!
@@ -42,13 +42,13 @@ Use your favorite plugin manager!
 </details>
 
 ## Others
-Run `shellcheck` in command mode.
+Set `shellcheck` diagnostics for the current buffer.
 
 ```c
 :lua ShellCheck.run()
 ```
 
-Clean `shellcheck` diagnostics for current buffer.
+Clean `shellcheck` diagnostics for the current buffer.
 
 ```c
 :lua ShellCheck.clean()
