@@ -101,7 +101,7 @@ function H:get_shellcheck_output(file_path, buffern)
         return
     end
 
-    -- Async thread, main logic is here
+    -- Async thread
     local shellcheck_output = ''
     local handler
     local stdout_pipe = vim.uv.new_pipe(false)
@@ -113,7 +113,7 @@ function H:get_shellcheck_output(file_path, buffern)
         stdout_pipe:close()
         handler:close()
 
-        -- If shell is not supported clean diagnostics on buffer.
+        -- If shell is not supported clean diagnostics.
         -- This handles the case of changing the shell on the go.
         if shellcheck_output == '' then shellcheck_output = '[]' end
 
@@ -134,7 +134,7 @@ function H:get_shellcheck_output(file_path, buffern)
         assert(not err, err)
 
         if data and self.shell_supported(data) then
-            -- If json is too large I want to append the output
+            -- If json is too large append the output.
             shellcheck_output = shellcheck_output .. string.gsub(data, '\n', '')
         end
     end)
