@@ -42,19 +42,19 @@ Use your favorite plugin manager!
 </details>
 
 ## Others
-Set `shellcheck` diagnostics for the current buffer.
+Set `shellcheck` diagnostics.
 
 ```c
 :lua ShellCheck.run()
 ```
 
-Clean `shellcheck` diagnostics for the current buffer.
+Clean `shellcheck` diagnostics.
 
 ```c
 :lua ShellCheck.clean()
 ```
 
-Force diagnostics for some wrapper. (Remeber to set the filetype to _sh_ too)
+Force diagnostics for some wrapper. Remeber to set the filetype to _sh_ too.
 ```bash
 #!/bin/false
 # shellcheck shell=bash
