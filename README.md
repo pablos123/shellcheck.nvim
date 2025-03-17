@@ -1,5 +1,5 @@
 # shellcheck.nvim
-ShellCheck diagnostics inside Neovim.
+Extremely simple ShellCheck diagnostics inside Neovim.
 
 ## Features
 - Asynchronous.
@@ -7,7 +7,7 @@ ShellCheck diagnostics inside Neovim.
 - No ALE, Neomake or Syntastic needed.
 - Supports sh/bash/dash/ksh.
 - Runs only on `BufEnter` and `BufWritePost` events.
-- Runs only when filetype is _sh_.
+- Runs only when filetype is _sh_, _bash_ or _ksh_.
 
 ## Dependencies
 - `shellcheck` available in `$PATH`.
@@ -31,9 +31,9 @@ Use your favorite plugin manager!
 {
     'pablos123/shellcheck.nvim',
     config = function ()
-        -- Pass extra arguments to the shellcheck command.
+        -- Pass options to the shellcheck command.
         require 'shellcheck-nvim'.setup {
-            extras = { '-x', '--enable=all', },
+            shellcheck_options = { '-x', '--enable=all', },
         }
     end
 }
@@ -54,8 +54,9 @@ Clean `shellcheck` diagnostics for current buffer.
 :lua ShellCheck.clean()
 ```
 
-Force diagnostics for some wrapper. Remeber to `set ft=sh` too.
+Force diagnostics for some wrapper.
 ```bash
 #!/bin/false
 # shellcheck shell=bash
 ```
+Remeber to set the filetype too: `set ft=bash`

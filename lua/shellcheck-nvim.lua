@@ -12,7 +12,7 @@ end
 function ShellCheck.run()
     local file_path = vim.api.nvim_buf_get_name(0)
     if file_path == '' then return end
-    H:get_shellcheck_output(file_path, vim.api.nvim_get_current_buf())
+    H:run(file_path, vim.api.nvim_get_current_buf())
 end
 
 function ShellCheck.clean()
@@ -24,6 +24,11 @@ function H.has_shellcheck()
     return vim.fn.executable('shellcheck') == 1
 end
 
+function H.valid_filetype()
+    local filetype = vim.bo.filetype
+    return filetype == 'sh' or filetype == 'bash' or filetype == 'ksh'
+end
+
 function H.file_exists(file_path)
     return vim.fn.filereadable(file_path) == 1
 end
@@ -33,7 +38,7 @@ function H.shell_supported(output)
 end
 
 function H.print_error(error)
-    vim.api.nvim_err_writeln('ShellCheck: ' .. error)
+    vim.api.nvim_echo('ShellCheck: ' .. error, true, { err = true })
 end
 
 function H.get_nvim_severity(shellcheck_severity)
@@ -47,7 +52,7 @@ function H.get_nvim_severity(shellcheck_severity)
 end
 
 function H:set_config(config)
-    local default_configs = { extras = {} }
+    local default_configs = { shellcheck_options = {} }
     self.config = vim.tbl_extend('force', default_configs, config or {})
 end
 
@@ -59,8 +64,10 @@ function H:set_behaviour()
 
     local events = { 'BufEnter', 'BufWritePost' }
 
+    -- https://github.com/vim/vim/blob/master/runtime/filetype.vim
+    -- Vim do not recognize dash filetype.
     local run_shellcheck = function()
-        if vim.bo.filetype == 'sh' then ShellCheck.run() end
+        if self.valid_filetype() then ShellCheck.run() end
     end
 
     vim.api.nvim_create_autocmd(events, {
@@ -81,19 +88,19 @@ function H:handle_shellcheck_exit_code(code)
 end
 
 function H:prepare_args(file_path)
-    local shellcheck_args = {
+    local shellcheck_options = {
         '--color=never',
         '--format=json',
     }
-    for _, extra_arg in ipairs(self.config.extras) do
-        table.insert(shellcheck_args, extra_arg)
+    for _, option in ipairs(self.config.shellcheck_options) do
+        table.insert(shellcheck_options, option)
     end
-    table.insert(shellcheck_args, '--')
-    table.insert(shellcheck_args, file_path)
-    return shellcheck_args
+    table.insert(shellcheck_options, '--')
+    table.insert(shellcheck_options, file_path)
+    return shellcheck_options
 end
 
-function H:get_shellcheck_output(file_path, buffern)
+function H:run(file_path, buffern)
     if not self.file_exists(file_path) then return end
 
     if not self.has_shellcheck() then
@@ -105,6 +112,11 @@ function H:get_shellcheck_output(file_path, buffern)
     local shellcheck_output = ''
     local handler
     local stdout_pipe = vim.uv.new_pipe(false)
+
+    if not stdout_pipe then
+        self.print_error('cannot initialize pipe.')
+        return
+    end
 
     -- Execute on shellcheck exit. Append the call to nvim's main loop.
     local on_exit = vim.schedule_wrap(function(code)
@@ -144,14 +156,14 @@ function H:set_shellcheck_diagnostics(shellcheck_output, buffern)
     assert(shellcheck_output)
     assert(shellcheck_output ~= '')
 
-    local diagnosticss = self:create_nvim_diagnostics(
+    local diagnostics = self:create_nvim_diagnostics(
         vim.fn.json_decode(shellcheck_output),
         buffern
     )
     vim.diagnostic.set(
         vim.api.nvim_create_namespace('shellcheck-nvim'),
         buffern,
-        diagnosticss,
+        diagnostics,
         {}
     )
 end
