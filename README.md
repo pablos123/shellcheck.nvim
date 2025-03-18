@@ -1,5 +1,5 @@
 # shellcheck.nvim
-Simple [ShellCheck](https://www.shellcheck.net/) diagnostics inside Neovim.
+[ShellCheck](https://www.shellcheck.net/) diagnostics inside Neovim.
 
 ## Features
 - Asynchronous.
