@@ -1,5 +1,5 @@
 # shellcheck.nvim
-Minimal ShellCheck diagnostics inside Neovim.
+Simple [ShellCheck](https://www.shellcheck.net/) diagnostics inside Neovim.
 
 ## Features
 - Asynchronous.
@@ -44,13 +44,13 @@ Use your favorite plugin manager!
 ## Others
 Set `shellcheck` diagnostics for current buffer.
 
-```c
+```vim
 :lua ShellCheck.run()
 ```
 
 Clean `shellcheck` diagnostics for current buffer.
 
-```c
+```vim
 :lua ShellCheck.clean()
 ```
 
@@ -59,4 +59,8 @@ Force diagnostics for some wrapper.
 #!/bin/false
 # shellcheck shell=<sh/ksh/dash/bash>
 ```
-Remeber to set the filetype too: `set ft=<sh/ksh/bash>` (`dash` is not a `vim/nvim` filetype!)
+Remeber to set the filetype too.
+```vim
+:set ft=<sh/ksh/bash>
+```
+`dash` is not a valid `vim/nvim` filetype.
