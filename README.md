@@ -42,13 +42,13 @@ Use your favorite plugin manager!
 </details>
 
 ## Others
-Set `shellcheck` diagnostics for current buffer.
+Set ShellCheck diagnostics for current buffer.
 
 ```vim
 :lua ShellCheck.run()
 ```
 
-Clean `shellcheck` diagnostics for current buffer.
+Clean ShellCheck diagnostics for current buffer.
 
 ```vim
 :lua ShellCheck.clean()
