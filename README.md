@@ -41,7 +41,7 @@ Use your favorite plugin manager!
 
 </details>
 
-## Others
+## Available functions
 Set `shellcheck` diagnostics for current buffer.
 
 ```vim
@@ -54,6 +54,7 @@ Clean `shellcheck` diagnostics for current buffer.
 :lua ShellCheck.clean()
 ```
 
+## Others
 Force diagnostics for some wrapper.
 ```bash
 #!/bin/false

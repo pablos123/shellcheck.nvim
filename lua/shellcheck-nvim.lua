@@ -38,7 +38,7 @@ function H.shell_supported(output)
 end
 
 function H.print_error(error)
-    vim.api.nvim_echo('ShellCheck: ' .. error, true, { err = true })
+    vim.api.nvim_echo({ { 'ShellCheck: ' .. error, 'ErrorMsg' } }, true, { err = true })
 end
 
 function H.get_nvim_severity(shellcheck_severity)
