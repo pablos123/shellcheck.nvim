@@ -42,13 +42,13 @@ Use your favorite plugin manager!
 </details>
 
 ## Available functions
-Set `shellcheck` diagnostics for current buffer.
+Set ShellCheck diagnostics for current buffer.
 
 ```vim
 :lua ShellCheck.run()
 ```
 
-Clean `shellcheck` diagnostics for current buffer.
+Clean ShellCheck diagnostics for current buffer.
 
 ```vim
 :lua ShellCheck.clean()
@@ -56,6 +56,7 @@ Clean `shellcheck` diagnostics for current buffer.
 
 ## Others
 Force diagnostics for some wrapper.
+
 ```bash
 #!/bin/false
 # shellcheck shell=<sh/ksh/dash/bash>
